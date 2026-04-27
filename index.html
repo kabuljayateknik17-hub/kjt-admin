@@ -1,156 +1,65 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin Pro</title>
-  <style>
-    body { font-family: Arial; background:#f5f5f5; padding:20px; }
-    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:6px 10px; margin:3px; }
-    .hapus { background:red; color:#fff; }
-    .wa { background:green; color:#fff; }
-    .edit { background:orange; color:#fff; }
-  </style>
+  <title>KJT Admin</title>
 </head>
 
 <body>
 
-<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
+<h2>Input Data</h2>
 
-<div class="box">
-  <input id="nama" placeholder="Nama Pelanggan">
-  <input id="hp" placeholder="No HP">
-  <input id="alamat" placeholder="Alamat">
-  <input id="merk" placeholder="Merk AC">
-  <input id="pk" placeholder="PK">
-  <input id="keluhan" placeholder="Keluhan">
-  <input id="biaya" placeholder="Biaya">
-  <input id="teknisi" placeholder="Nama Teknisi">
-  <input type="date" id="tanggal">
-  <input type="time" id="jam">
+<input type="text" id="nama" placeholder="Nama"><br><br>
+<input type="text" id="alamat" placeholder="Alamat"><br><br>
 
-  <select id="status">
-    <option>Proses</option>
-    <option>Selesai</option>
-    <option>Pending</option>
-  </select>
+<button onclick="tambah()">Simpan</button>
 
-  <button onclick="tambah()">Tambah / Update</button>
-</div>
+<h3>Data:</h3>
+<div id="listData"></div>
 
-<div id="list"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<script>
-let data = JSON.parse(localStorage.getItem("kjt")) || [];
-let editIndex = -1;
+const firebaseConfig = {
+  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
+  authDomain: "kjt-admin.firebaseapp.com",
+  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kjt-admin",
+  storageBucket: "kjt-admin.firebasestorage.app",
+  messagingSenderId: "605090490067",
+  appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
+};
 
-function tambah(){
-  let d = {
-    nama: nama.value,
-    hp: hp.value,
-    alamat: alamat.value,
-    merk: merk.value,
-    pk: pk.value,
-    keluhan: keluhan.value,
-    biaya: biaya.value,
-    teknisi: teknisi.value,
-    tanggal: tanggal.value,
-    jam: jam.value,
-    status: status.value
-  };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  if(editIndex >= 0){
-    data[editIndex] = d;
-    editIndex = -1;
-  } else {
-    data.push(d);
+window.tambah = function(){
+  const nama = document.getElementById("nama").value;
+  const alamat = document.getElementById("alamat").value;
+
+  if(!nama || !alamat){
+    alert("Isi dulu!");
+    return;
   }
 
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
+  push(ref(db, "data"), { nama, alamat });
 }
 
-function tampil(){
-  let html = "";
-  data.forEach((d,i)=>{
-    html += `
-    <div class="box">
-      <b>${d.nama}</b> (${d.hp})<br>
-      ${d.alamat}<br>
-      ${d.merk} - ${d.pk}<br>
-      Teknisi: <b>${d.teknisi || "-"}</b><br>
-      Keluhan: ${d.keluhan}<br>
-      Biaya: Rp ${d.biaya}<br>
-      📅 ${d.tanggal} | ⏰ ${d.jam}<br>
-      Status: <b>${d.status}</b><br><br>
+onValue(ref(db, "data"), (snapshot) => {
+  const data = snapshot.val();
+  const list = document.getElementById("listData");
 
-      <button onclick="ubahStatus(${i},'Proses')">Proses</button>
-      <button onclick="ubahStatus(${i},'Selesai')">Selesai</button>
-      <button onclick="ubahStatus(${i},'Pending')">Pending</button>
-      <button class="edit" onclick="editData(${i})">Edit</button>
-      <button class="wa" onclick="kirimWA(${i})">WA</button>
-      <button class="hapus" onclick="hapus(${i})">Hapus</button>
-    </div>
-    `;
-  });
+  list.innerHTML = "";
 
-  document.getElementById("list").innerHTML = html;
-}
-
-function editData(i){
-  let d = data[i];
-  nama.value = d.nama;
-  hp.value = d.hp;
-  alamat.value = d.alamat;
-  merk.value = d.merk;
-  pk.value = d.pk;
-  keluhan.value = d.keluhan;
-  biaya.value = d.biaya;
-  teknisi.value = d.teknisi;
-  tanggal.value = d.tanggal;
-  jam.value = d.jam;
-  status.value = d.status;
-
-  editIndex = i;
-}
-
-function ubahStatus(i,s){
-  data[i].status = s;
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
-}
-
-function hapus(i){
-  if(confirm("Yakin hapus data?")){
-    data.splice(i,1);
-    localStorage.setItem("kjt", JSON.stringify(data));
-    tampil();
+  if(!data){
+    list.innerHTML = "Belum ada data";
+    return;
   }
-}
 
-function kirimWA(i){
-  let d = data[i];
-
-  let pesan = `Halo ${d.nama},
-Jadwal Servis AC Anda:
-
-📅 ${d.tanggal}
-⏰ ${d.jam}
-👷 Teknisi: ${d.teknisi}
-📍 ${d.alamat}
-🔧 ${d.keluhan}
-💰 Rp ${d.biaya}
-
-Mohon standby ya 🙏
-- Kabul Jaya Teknik`;
-
-  let no = d.hp.replace(/^0/, "62");
-  let url = "https://wa.me/" + no + "?text=" + encodeURIComponent(pesan);
-  window.open(url);
-}
-
-tampil();
+  for(let key in data){
+    list.innerHTML += `<p><b>${data[key].nama}</b> - ${data[key].alamat}</p>`;
+  }
+});
 </script>
 
 </body>
