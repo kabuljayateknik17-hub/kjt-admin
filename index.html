@@ -9,6 +9,9 @@
 
 <input id="nama" placeholder="Nama"><br><br>
 <input id="alamat" placeholder="Alamat"><br><br>
+<input id="keluhan" placeholder="Keluhan AC"><br><br>
+<input id="teknisi" placeholder="Teknisi"><br><br>
+<input id="wa" placeholder="No WhatsApp (628xxx)"><br><br>
 
 <button onclick="tambah()">Simpan</button>
 
@@ -32,18 +35,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// SIMPAN
 window.tambah = function(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
+  const keluhan = document.getElementById("keluhan").value;
+  const teknisi = document.getElementById("teknisi").value;
+  const wa = document.getElementById("wa").value;
 
-  if(!nama || !alamat){
-    alert("Isi dulu semua!");
+  if(!nama || !alamat || !keluhan || !teknisi || !wa){
+    alert("Isi semua data!");
     return;
   }
 
-  push(ref(db, "data"), { nama, alamat });
+  push(ref(db, "data"), {
+    nama, alamat, keluhan, teknisi, wa
+  });
+
+  alert("Berhasil disimpan");
 }
 
+// TAMPIL
 onValue(ref(db, "data"), (snapshot) => {
   const data = snapshot.val();
   const list = document.getElementById("listData");
@@ -56,7 +68,21 @@ onValue(ref(db, "data"), (snapshot) => {
   }
 
   for(let key in data){
-    list.innerHTML += `<p><b>${data[key].nama}</b> - ${data[key].alamat}</p>`;
+    const d = data[key];
+
+    list.innerHTML += `
+      <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        <b>${d.nama}</b><br>
+        📍 ${d.alamat}<br>
+        ❄️ ${d.keluhan}<br>
+        👨‍🔧 ${d.teknisi}<br>
+        📱 ${d.wa}<br><br>
+
+        <a href="https://wa.me/${d.wa}" target="_blank">
+          <button>Kirim WhatsApp</button>
+        </a>
+      </div>
+    `;
   }
 });
 </script>
