@@ -1,155 +1,127 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin Pro</title>
-  <style>
-    body { font-family: Arial; background:#f5f5f5; padding:20px; }
-    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:6px 10px; margin:3px; }
-    .hapus { background:red; color:#fff; }
-    .wa { background:green; color:#fff; }
-    .edit { background:orange; color:#fff; }
-  </style>
+  <title>Admin Servis AC - Kabul Jaya Teknik</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
 <body>
 
 <h2>Admin Servis AC - Kabul Jaya Teknik</h2>
 
-<div class="box">
-  <input id="nama" placeholder="Nama Pelanggan">
-  <input id="hp" placeholder="No HP">
-  <input id="alamat" placeholder="Alamat">
-  <input id="merk" placeholder="Merk AC">
-  <input id="pk" placeholder="PK">
-  <input id="keluhan" placeholder="Keluhan">
-  <input id="biaya" placeholder="Biaya">
-  <input id="teknisi" placeholder="Nama Teknisi">
-  <input type="date" id="tanggal">
-  <input type="time" id="jam">
+<input id="nama" placeholder="Nama"><br><br>
+<input id="hp" placeholder="No HP"><br><br>
+<input id="alamat" placeholder="Alamat"><br><br>
+<input id="merk" placeholder="Merk AC"><br><br>
+<input id="pk" placeholder="PK"><br><br>
+<input id="keluhan" placeholder="Keluhan"><br><br>
+<input id="biaya" placeholder="Biaya"><br><br>
+<input id="teknisi" placeholder="Nama Teknisi"><br><br>
 
-  <select id="status">
-    <option>Proses</option>
-    <option>Selesai</option>
-    <option>Pending</option>
-  </select>
+<select id="status">
+  <option value="Proses">Proses</option>
+  <option value="Selesai">Selesai</option>
+  <option value="Pending">Pending</option>
+</select><br><br>
 
-  <button onclick="tambah()">Tambah / Update</button>
-</div>
+<button onclick="simpan()">Simpan</button>
 
+<h3>Data Servis</h3>
 <div id="list"></div>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <script>
-let data = JSON.parse(localStorage.getItem("kjt")) || [];
-let editIndex = -1;
+var firebaseConfig = {
+  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
+  authDomain: "kjt-admin.firebaseapp.com",
+  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kjt-admin"
+};
 
-function tambah(){
-  let d = {
-    nama: nama.value,
-    hp: hp.value,
-    alamat: alamat.value,
-    merk: merk.value,
-    pk: pk.value,
-    keluhan: keluhan.value,
-    biaya: biaya.value,
-    teknisi: teknisi.value,
-    tanggal: tanggal.value,
-    jam: jam.value,
-    status: status.value
-  };
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
 
-  if(editIndex >= 0){
-    data[editIndex] = d;
-    editIndex = -1;
-  } else {
-    data.push(d);
-  }
+var editId = null;
 
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
+function getVal(id){
+  var el = document.getElementById(id);
+  return el ? el.value : "";
 }
 
-function tampil(){
-  let html = "";
-  data.forEach((d,i)=>{
-    html += `
-    <div class="box">
-      <b>${d.nama}</b> (${d.hp})<br>
-      ${d.alamat}<br>
-      ${d.merk} - ${d.pk}<br>
-      Teknisi: <b>${d.teknisi || "-"}</b><br>
-      Keluhan: ${d.keluhan}<br>
-      Biaya: Rp ${d.biaya}<br>
-      📅 ${d.tanggal} | ⏰ ${d.jam}<br>
-      Status: <b>${d.status}</b><br><br>
+function simpan(){
+  var data = {
+    nama: getVal("nama"),
+    hp: getVal("hp"),
+    alamat: getVal("alamat"),
+    merk: getVal("merk"),
+    pk: getVal("pk"),
+    keluhan: getVal("keluhan"),
+    biaya: getVal("biaya"),
+    teknisi: getVal("teknisi"),
+    status: getVal("status"),
+    tanggal: new Date().toLocaleDateString(),
+    jam: new Date().toLocaleTimeString()
+  };
 
-      <button onclick="ubahStatus(${i},'Proses')">Proses</button>
-      <button onclick="ubahStatus(${i},'Selesai')">Selesai</button>
-      <button onclick="ubahStatus(${i},'Pending')">Pending</button>
-      <button class="edit" onclick="editData(${i})">Edit</button>
-      <button class="wa" onclick="kirimWA(${i})">WA</button>
-      <button class="hapus" onclick="hapus(${i})">Hapus</button>
+  if(editId){
+    db.ref("data/"+editId).update(data);
+    editId = null;
+  } else {
+    db.ref("data").push(data);
+  }
+}
+
+function hapus(id){
+  db.ref("data/"+id).remove();
+}
+
+function edit(id, data){
+  editId = id;
+
+  document.getElementById("nama").value = data.nama || "";
+  document.getElementById("hp").value = data.hp || "";
+  document.getElementById("alamat").value = data.alamat || "";
+  document.getElementById("merk").value = data.merk || "";
+  document.getElementById("pk").value = data.pk || "";
+  document.getElementById("keluhan").value = data.keluhan || "";
+  document.getElementById("biaya").value = data.biaya || "";
+  document.getElementById("teknisi").value = data.teknisi || "";
+  document.getElementById("status").value = data.status || "Proses";
+}
+
+db.ref("data").on("value", function(snapshot){
+  var html = "";
+
+  snapshot.forEach(function(child){
+    var d = child.val() || {};
+    var id = child.key;
+
+    var wa = "https://wa.me/"+(d.hp||"")+"?text=Halo%20"+(d.nama||"")+"%20status%20servis:%20"+(d.status||"");
+
+    html += `
+    <div style="border:1px solid #ccc;padding:10px;margin:10px;border-radius:8px;">
+      <b>${d.nama || "-"}</b> (${d.hp || "-"})<br>
+      ${d.alamat || "-"}<br>
+      ${d.merk || "-"} - ${d.pk || "-"}<br>
+      Keluhan: ${d.keluhan || "-"}<br>
+      Biaya: Rp ${d.biaya || "-"}<br>
+      Teknisi: ${d.teknisi || "-"}<br>
+      📅 ${d.tanggal || "-"} | ⏰ ${d.jam || "-"}<br>
+      Status: <b>${d.status || "-"}</b><br><br>
+
+      <button onclick='edit("${id}", ${JSON.stringify(d)})'>Edit</button>
+      <a href="${wa}" target="_blank">
+        <button style="background:green;color:white;">WA</button>
+      </a>
+      <button onclick='hapus("${id}")' style="background:red;color:white;">Hapus</button>
     </div>
     `;
   });
 
   document.getElementById("list").innerHTML = html;
-}
-
-function editData(i){
-  let d = data[i];
-  nama.value = d.nama;
-  hp.value = d.hp;
-  alamat.value = d.alamat;
-  merk.value = d.merk;
-  pk.value = d.pk;
-  keluhan.value = d.keluhan;
-  biaya.value = d.biaya;
-  teknisi.value = d.teknisi;
-  tanggal.value = d.tanggal;
-  jam.value = d.jam;
-  status.value = d.status;
-
-  editIndex = i;
-}
-
-function ubahStatus(i,s){
-  data[i].status = s;
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
-}
-
-function hapus(i){
-  if(confirm("Yakin hapus data?")){
-    data.splice(i,1);
-    localStorage.setItem("kjt", JSON.stringify(data));
-    tampil();
-  }
-}
-
-function kirimWA(i){
-  let d = data[i];
-
-  let pesan = `Halo ${d.nama},
-Jadwal Servis AC Anda:
-
-📅 ${d.tanggal}
-⏰ ${d.jam}
-👷 Teknisi: ${d.teknisi}
-📍 ${d.alamat}
-🔧 ${d.keluhan}
-💰 Rp ${d.biaya}
-
-Mohon standby ya 🙏
-- Kabul Jaya Teknik`;
-
-  let no = d.hp.replace(/^0/, "62");
-  let url = "https://wa.me/" + no + "?text=" + encodeURIComponent(pesan);
-  window.open(url);
-}
-
-tampil();
+});
 </script>
 
 </body>
