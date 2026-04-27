@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -35,7 +36,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// SIMPAN
 window.tambah = function(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
@@ -48,14 +48,9 @@ window.tambah = function(){
     return;
   }
 
-  push(ref(db, "data"), {
-    nama, alamat, keluhan, teknisi, wa
-  });
-
-  alert("Berhasil disimpan");
+  push(ref(db, "data"), { nama, alamat, keluhan, teknisi, wa });
 }
 
-// TAMPIL
 onValue(ref(db, "data"), (snapshot) => {
   const data = snapshot.val();
   const list = document.getElementById("listData");
@@ -71,16 +66,14 @@ onValue(ref(db, "data"), (snapshot) => {
     const d = data[key];
 
     list.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+      <div>
         <b>${d.nama}</b><br>
-        📍 ${d.alamat}<br>
-        ❄️ ${d.keluhan}<br>
-        👨‍🔧 ${d.teknisi}<br>
-        📱 ${d.wa}<br><br>
-
-        <a href="https://wa.me/${d.wa}" target="_blank">
-          <button>Kirim WhatsApp</button>
-        </a>
+        ${d.alamat}<br>
+        ${d.keluhan}<br>
+        ${d.teknisi}<br>
+        ${d.wa}<br>
+        <a href="https://wa.me/${d.wa}" target="_blank">Chat WA</a>
+        <hr>
       </div>
     `;
   }
