@@ -1,36 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Servis AC - Kabul Jaya Teknik</title>
-</head>
-<body>
-
-<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
-
-<input id="nama" placeholder="Nama"><br><br>
-<input id="alamat" placeholder="Alamat"><br><br>
-<input id="keluhan" placeholder="Keluhan"><br><br>
-<input id="teknisi" placeholder="Teknisi"><br><br>
-<input id="wa" placeholder="No WA"><br><br>
-
-<button onclick="tambah()">Simpan</button>
-
-<h3>Data Servis</h3>
-<div id="list"></div>
-
-<!-- FIREBASE CDN -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
 var firebaseConfig = {
-  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKs0rNeZdyD9k",
+  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
-  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "kjt-admin",
-  storageBucket: "kjt-admin.appspot.com",
-  messagingSenderId: "605090490067",
-  appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
+  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kjt-admin"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -39,39 +15,21 @@ var db = firebase.database();
 function tambah(){
   var nama = document.getElementById("nama").value;
   var alamat = document.getElementById("alamat").value;
-  var keluhan = document.getElementById("keluhan").value;
-  var teknisi = document.getElementById("teknisi").value;
-  var wa = document.getElementById("wa").value;
 
   db.ref("data").push({
     nama: nama,
-    alamat: alamat,
-    keluhan: keluhan,
-    teknisi: teknisi,
-    wa: wa
+    alamat: alamat
   });
-
-  alert("Data tersimpan");
 }
 
+// TAMPILKAN DATA (INI YANG PENTING)
 db.ref("data").on("value", function(snapshot){
-  var data = snapshot.val();
-  var list = document.getElementById("list");
-  list.innerHTML = "";
+  var html = "";
+  snapshot.forEach(function(child){
+    var data = child.val();
+    html += "<p>" + data.nama + " - " + data.alamat + "</p>";
+  });
 
-  for(var key in data){
-    list.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <b>${data[key].nama}</b><br>
-        ${data[key].alamat}<br>
-        Keluhan: ${data[key].keluhan}<br>
-        Teknisi: ${data[key].teknisi}<br>
-        <a href="https://wa.me/${data[key].wa}" target="_blank">Chat WA</a>
-      </div>
-    `;
-  }
+  document.getElementById("list").innerHTML = html;
 });
 </script>
-
-</body>
-</html>
