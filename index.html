@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin</title>
+  <title>Admin Servis AC - Kabul Jaya Teknik</title>
 </head>
 <body>
 
-<h2>Input Servis</h2>
+<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
 
 <input id="nama" placeholder="Nama"><br><br>
 <input id="alamat" placeholder="Alamat"><br><br>
+<input id="keluhan" placeholder="Keluhan"><br><br>
+<input id="teknisi" placeholder="Teknisi"><br><br>
+<input id="wa" placeholder="No WA"><br><br>
 
 <button onclick="tambah()">Simpan</button>
 
-<h3>Data</h3>
+<h3>Data Servis</h3>
 <div id="list"></div>
 
-<!-- Firebase simple (pasti jalan di semua HP) -->
+<!-- FIREBASE CDN -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -23,8 +26,11 @@
 var firebaseConfig = {
   apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKs0rNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
-  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "kjt-admin"
+  databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId: "kjt-admin",
+  storageBucket: "kjt-admin.appspot.com",
+  messagingSenderId: "605090490067",
+  appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -33,11 +39,19 @@ var db = firebase.database();
 function tambah(){
   var nama = document.getElementById("nama").value;
   var alamat = document.getElementById("alamat").value;
+  var keluhan = document.getElementById("keluhan").value;
+  var teknisi = document.getElementById("teknisi").value;
+  var wa = document.getElementById("wa").value;
 
   db.ref("data").push({
     nama: nama,
-    alamat: alamat
+    alamat: alamat,
+    keluhan: keluhan,
+    teknisi: teknisi,
+    wa: wa
   });
+
+  alert("Data tersimpan");
 }
 
 db.ref("data").on("value", function(snapshot){
@@ -45,13 +59,16 @@ db.ref("data").on("value", function(snapshot){
   var list = document.getElementById("list");
   list.innerHTML = "";
 
-  if(!data){
-    list.innerHTML = "Belum ada data";
-    return;
-  }
-
   for(var key in data){
-    list.innerHTML += "<p>"+data[key].nama+" - "+data[key].alamat+"</p>";
+    list.innerHTML += `
+      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <b>${data[key].nama}</b><br>
+        ${data[key].alamat}<br>
+        Keluhan: ${data[key].keluhan}<br>
+        Teknisi: ${data[key].teknisi}<br>
+        <a href="https://wa.me/${data[key].wa}" target="_blank">Chat WA</a>
+      </div>
+    `;
   }
 });
 </script>
