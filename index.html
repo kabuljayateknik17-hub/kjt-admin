@@ -1,66 +1,57 @@
-<script type="module">
-// Import Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KJT Admin</title>
+</head>
+<body>
 
-// CONFIG
+<h2>Input Servis</h2>
+
+<input id="nama" placeholder="Nama"><br><br>
+<input id="alamat" placeholder="Alamat"><br><br>
+
+<button onclick="tambah()">Simpan</button>
+
+<h3>Data</h3>
+<div id="list"></div>
+
+<!-- Firebase versi SIMPLE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
 const firebaseConfig = {
-  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
+  apiKey: "PASTE_APIKEY_KAMU",
   authDomain: "kjt-admin.firebaseapp.com",
   databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "kjt-admin",
-  storageBucket: "kjt-admin.firebasestorage.app",
-  messagingSenderId: "605090490067",
-  appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
+  projectId: "kjt-admin"
 };
 
-// INIT
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// ================= SIMPAN =================
-window.tambah = function(){
-  const nama = document.getElementById("nama").value;
-  const alamat = document.getElementById("alamat").value;
+function tambah(){
+  var nama = document.getElementById("nama").value;
+  var alamat = document.getElementById("alamat").value;
 
-  if(!nama || !alamat){
-    alert("Isi dulu semua!");
-    return;
-  }
-
-  push(ref(db, "data"), {
+  db.ref("data").push({
     nama: nama,
     alamat: alamat
   });
 
-  alert("Data berhasil disimpan!");
-
-  document.getElementById("nama").value = "";
-  document.getElementById("alamat").value = "";
+  alert("OK");
 }
 
-// ================= TAMPIL =================
-const dataRef = ref(db, "data");
-onValue(dataRef, (snapshot) => {
-  const data = snapshot.val();
-  const container = document.getElementById("listData");
+db.ref("data").on("value", function(snapshot){
+  var data = snapshot.val();
+  var list = document.getElementById("list");
+  list.innerHTML = "";
 
-  container.innerHTML = "";
-
-  if(!data){
-    container.innerHTML = "Belum ada data";
-    return;
+  for(var key in data){
+    list.innerHTML += "<p>"+data[key].nama+" - "+data[key].alamat+"</p>";
   }
-
-  Object.keys(data).forEach((key) => {
-    const item = data[key];
-
-    container.innerHTML += `
-      <div style="margin:10px 0; padding:10px; border:1px solid #ccc;">
-        <b>${item.nama}</b><br>
-        ${item.alamat}
-      </div>
-    `;
-  });
 });
 </script>
+
+</body>
+</html>
