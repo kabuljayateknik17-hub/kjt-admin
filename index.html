@@ -3,18 +3,17 @@
 <head>
   <title>KJT Admin</title>
 </head>
-
 <body>
 
-<h2>Input Data</h2>
+<h2>Input Data Servis</h2>
 
-<input type="text" id="nama" placeholder="Nama"><br><br>
-<input type="text" id="alamat" placeholder="Alamat"><br><br>
+<input id="nama" placeholder="Nama"><br><br>
+<input id="alamat" placeholder="Alamat"><br><br>
 
 <button onclick="tambah()">Simpan</button>
 
-<h3>Data:</h3>
-<div id="listData"></div>
+<h3>Data Masuk</h3>
+<div id="listData">Loading...</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -38,7 +37,7 @@ window.tambah = function(){
   const alamat = document.getElementById("alamat").value;
 
   if(!nama || !alamat){
-    alert("Isi dulu!");
+    alert("Isi dulu semua!");
     return;
   }
 
