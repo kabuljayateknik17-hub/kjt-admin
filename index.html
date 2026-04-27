@@ -91,3 +91,10 @@ tampil();
 
 </body>
 </html>
+function hapus(i){
+  if(confirm("Yakin mau hapus data ini?")){
+    data.splice(i,1);
+    localStorage.setItem("kjt",JSON.stringify(data));
+    tampil();
+  }
+}
