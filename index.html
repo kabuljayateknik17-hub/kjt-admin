@@ -1,17 +1,27 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin</title>
+  <title>KJT Admin Pro</title>
   <style>
-    body { font-family: Arial; background:#f5f5f5; padding:20px; }
-    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:6px 10px; margin:3px; }
+    body { font-family: Arial; background:#eef2f7; padding:20px; }
+    h2 { text-align:center; }
+    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    input, select { width:100%; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
+    button { padding:6px 10px; margin:3px; border:none; border-radius:5px; cursor:pointer; }
+    .btn { background:#007bff; color:#fff; }
+    .hapus { background:red; color:#fff; }
+    .status { font-weight:bold; }
+    .total { font-size:18px; font-weight:bold; text-align:center; margin-bottom:15px; }
   </style>
 </head>
 <body>
 
 <h2>Admin Servis AC - Kabul Jaya Teknik</h2>
+
+<div class="total">
+  Total Pemasukan: Rp <span id="total">0</span>
+</div>
 
 <div class="box">
   <input id="nama" placeholder="Nama">
@@ -30,7 +40,7 @@
     <option>Pending</option>
   </select>
 
-  <button onclick="tambah()">Tambah Order</button>
+  <button class="btn" onclick="tambah()">Tambah Order</button>
 </div>
 
 <div id="list"></div>
@@ -40,25 +50,32 @@ let data = JSON.parse(localStorage.getItem("kjt")) || [];
 
 function tampil(){
   let h="";
+  let total = 0;
+
   data.forEach((d,i)=>{
+    let biaya = parseInt(d.biaya) || 0;
+    total += biaya;
+
     h+=`
     <div class="box">
       <b>${d.nama}</b> (${d.hp})<br>
       ${d.alamat}<br>
       ${d.merk} - ${d.pk}<br>
       Keluhan: ${d.keluhan}<br>
-      Biaya: Rp ${d.biaya}<br>
+      Biaya: Rp ${biaya}<br>
       📅 ${d.tanggal || "-"} | ⏰ ${d.jam || "-"}<br>
-      Status: ${d.status}<br><br>
+      Status: <span class="status">${d.status}</span><br><br>
 
       <button onclick="ubahStatus(${i},'Proses')">Proses</button>
       <button onclick="ubahStatus(${i},'Selesai')">Selesai</button>
       <button onclick="ubahStatus(${i},'Pending')">Pending</button>
-      <button onclick="hapus(${i})">❌ Hapus</button>
+      <button class="hapus" onclick="hapus(${i})">Hapus</button>
     </div>
     `;
   });
-  document.getElementById("list").innerHTML=h;
+
+  document.getElementById("list").innerHTML = h;
+  document.getElementById("total").innerText = total;
 }
 
 function tambah(){
@@ -74,6 +91,7 @@ function tambah(){
     jam:jam.value,
     status:status.value
   });
+
   localStorage.setItem("kjt",JSON.stringify(data));
   tampil();
 }
@@ -85,7 +103,7 @@ function ubahStatus(i,s){
 }
 
 function hapus(i){
-  if(confirm("Yakin mau hapus data ini?")){
+  if(confirm("Yakin mau hapus?")){
     data.splice(i,1);
     localStorage.setItem("kjt",JSON.stringify(data));
     tampil();
