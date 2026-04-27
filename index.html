@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,12 +11,12 @@
 <input id="alamat" placeholder="Alamat"><br><br>
 <input id="keluhan" placeholder="Keluhan AC"><br><br>
 <input id="teknisi" placeholder="Teknisi"><br><br>
-<input id="wa" placeholder="No WhatsApp (628xxx)"><br><br>
+<input id="wa" placeholder="No WA"><br><br>
 
 <button onclick="tambah()">Simpan</button>
 
 <h3>Data Masuk</h3>
-<div id="listData">Loading...</div>
+<div id="listData"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -44,11 +43,12 @@ window.tambah = function(){
   const wa = document.getElementById("wa").value;
 
   if(!nama || !alamat || !keluhan || !teknisi || !wa){
-    alert("Isi semua data!");
+    alert("Isi semua!");
     return;
   }
 
   push(ref(db, "data"), { nama, alamat, keluhan, teknisi, wa });
+  alert("Berhasil disimpan!");
 }
 
 onValue(ref(db, "data"), (snapshot) => {
@@ -63,17 +63,13 @@ onValue(ref(db, "data"), (snapshot) => {
   }
 
   for(let key in data){
-    const d = data[key];
-
     list.innerHTML += `
-      <div>
-        <b>${d.nama}</b><br>
-        ${d.alamat}<br>
-        ${d.keluhan}<br>
-        ${d.teknisi}<br>
-        ${d.wa}<br>
-        <a href="https://wa.me/${d.wa}" target="_blank">Chat WA</a>
-        <hr>
+      <div style="border:1px solid #ccc; padding:10px; margin:5px;">
+        <b>${data[key].nama}</b><br>
+        ${data[key].alamat}<br>
+        Keluhan: ${data[key].keluhan}<br>
+        Teknisi: ${data[key].teknisi}<br>
+        <a href="https://wa.me/${data[key].wa}" target="_blank">Chat WA</a>
       </div>
     `;
   }
