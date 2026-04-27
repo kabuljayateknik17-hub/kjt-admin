@@ -1,12 +1,78 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KJT Admin</title>
+    <title>Admin KJT</title>
 </head>
 <body>
-    <h1>Selamat datang di KJT Admin</h1>
-    <p>Sistem servis AC Kabul Jaya Teknik</p>
+
+<h2>Input Data Servis AC</h2>
+
+<form id="formServis">
+    Nama: <input type="text" id="nama"><br><br>
+    No HP: <input type="text" id="hp"><br><br>
+    Alamat: <input type="text" id="alamat"><br><br>
+    Merk AC: <input type="text" id="merk"><br><br>
+    PK: <input type="text" id="pk"><br><br>
+    Keluhan: <input type="text" id="keluhan"><br><br>
+    Biaya: <input type="text" id="biaya"><br><br>
+    Teknisi: <input type="text" id="teknisi"><br><br>
+    Tanggal: <input type="date" id="tanggal"><br><br>
+    Jam: <input type="time" id="jam"><br><br>
+
+    <button type="submit">Simpan</button>
+</form>
+
+<h2>Data Servis</h2>
+<ul id="listData"></ul>
+
+<script>
+let data = JSON.parse(localStorage.getItem("servis")) || [];
+
+function tampilkanData() {
+    let list = document.getElementById("listData");
+    list.innerHTML = "";
+
+    data.forEach((item, index) => {
+        list.innerHTML += `
+        <li>
+            ${item.nama} - ${item.merk} - ${item.keluhan} 
+            <button onclick="hapus(${index})">Hapus</button>
+        </li>
+        `;
+    });
+}
+
+document.getElementById("formServis").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let newData = {
+        nama: document.getElementById("nama").value,
+        hp: document.getElementById("hp").value,
+        alamat: document.getElementById("alamat").value,
+        merk: document.getElementById("merk").value,
+        pk: document.getElementById("pk").value,
+        keluhan: document.getElementById("keluhan").value,
+        biaya: document.getElementById("biaya").value,
+        teknisi: document.getElementById("teknisi").value,
+        tanggal: document.getElementById("tanggal").value,
+        jam: document.getElementById("jam").value
+    };
+
+    data.push(newData);
+    localStorage.setItem("servis", JSON.stringify(data));
+
+    tampilkanData();
+    this.reset();
+});
+
+function hapus(index) {
+    data.splice(index, 1);
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+}
+
+tampilkanData();
+</script>
+
 </body>
 </html>
