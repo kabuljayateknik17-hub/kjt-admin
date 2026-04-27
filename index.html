@@ -1,60 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Servis AC - Kabul Jaya Teknik</title>
-  <style>
-    body { font-family: Arial; padding:20px; background:#f5f5f5; }
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:6px 10px; margin:3px; }
-    .card {
-      background:#fff;
-      padding:10px;
-      margin-top:10px;
-      border-radius:8px;
-      box-shadow:0 0 5px rgba(0,0,0,0.1);
-    }
-    .btn { border:none; color:#fff; cursor:pointer; }
-    .proses { background:gray; }
-    .selesai { background:green; }
-    .pending { background:orange; }
-    .wa { background:#25D366; }
-    .hapus { background:red; }
-  </style>
-</head>
-<body>
-
-<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
-
-<input id="nama" placeholder="Nama Pelanggan">
-<input id="hp" placeholder="No HP">
-<input id="alamat" placeholder="Alamat">
-<input id="merk" placeholder="Merk AC">
-<input id="pk" placeholder="PK">
-<input id="keluhan" placeholder="Keluhan">
-<input id="biaya" placeholder="Biaya">
-<input id="teknisi" placeholder="Nama Teknisi">
-
-<select id="status">
-  <option value="Proses">Proses</option>
-  <option value="Selesai">Selesai</option>
-  <option value="Pending">Pending</option>
-</select>
-
-<button onclick="tambah()">Tambah / Update</button>
-
-<h3>Data Servis</h3>
-<div id="listData"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
+  apiKey: "PASTE_APIKEY_KAMU",
   authDomain: "kjt-admin.firebaseapp.com",
   databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "kjt-admin",
-  storageBucket: "kjt-admin.firebasestorage.app",
+  storageBucket: "kjt-admin.appspot.com",
   messagingSenderId: "605090490067",
   appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
 };
@@ -63,66 +16,29 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 window.tambah = function(){
-  const data = {
-    nama: nama.value,
-    hp: hp.value,
-    alamat: alamat.value,
-    merk: merk.value,
-    pk: pk.value,
-    keluhan: keluhan.value,
-    biaya: biaya.value,
-    teknisi: teknisi.value,
-    status: status.value,
-    waktu: new Date().toLocaleString()
-  };
+  const nama = document.getElementById("nama").value;
+  const alamat = document.getElementById("alamat").value;
 
-  push(ref(db,"data"), data);
+  push(ref(db, "data"), {
+    nama: nama,
+    alamat: alamat
+  });
+
   alert("Berhasil disimpan");
-}
+};
 
-onValue(ref(db,"data"), (snapshot)=>{
+onValue(ref(db, "data"), (snapshot) => {
   const data = snapshot.val();
   const list = document.getElementById("listData");
   list.innerHTML = "";
 
-  for(let id in data){
-    const d = data[id];
+  if(!data){
+    list.innerHTML = "Belum ada data";
+    return;
+  }
 
-    list.innerHTML += `
-      <div class="card">
-        <b>${d.nama}</b> (${d.hp})<br>
-        ${d.alamat}<br>
-        ${d.merk} - ${d.pk}<br>
-        Teknisi: ${d.teknisi}<br>
-        Keluhan: ${d.keluhan}<br>
-        Biaya: Rp ${d.biaya}<br>
-        <small>${d.waktu}</small><br>
-        Status: <b>${d.status}</b><br><br>
-
-        <button class="btn proses" onclick="ubahStatus('${id}','Proses')">Proses</button>
-        <button class="btn selesai" onclick="ubahStatus('${id}','Selesai')">Selesai</button>
-        <button class="btn pending" onclick="ubahStatus('${id}','Pending')">Pending</button>
-        <button class="btn wa" onclick="wa('${d.hp}')">WA</button>
-        <button class="btn hapus" onclick="hapus('${id}')">Hapus</button>
-      </div>
-    `;
+  for(let key in data){
+    list.innerHTML += `<p><b>${data[key].nama}</b> - ${data[key].alamat}</p>`;
   }
 });
-
-window.hapus = function(id){
-  if(confirm("Hapus data?")){
-    remove(ref(db,"data/"+id));
-  }
-}
-
-window.ubahStatus = function(id, status){
-  update(ref(db,"data/"+id), {status:status});
-}
-
-window.wa = function(no){
-  window.open("https://wa.me/"+no);
-}
 </script>
-
-</body>
-</html>
