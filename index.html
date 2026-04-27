@@ -2,14 +2,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin</title>
+  <title>KJT Admin Pro</title>
   <style>
     body { font-family: Arial; background:#f5f5f5; padding:20px; }
     .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
     input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:8px; margin-top:5px; }
+    button { padding:6px 10px; margin:3px; }
     .hapus { background:red; color:#fff; }
     .wa { background:green; color:#fff; }
+    .edit { background:orange; color:#fff; }
   </style>
 </head>
 
@@ -25,11 +26,8 @@
   <input id="pk" placeholder="PK">
   <input id="keluhan" placeholder="Keluhan">
   <input id="biaya" placeholder="Biaya">
-
-  <label>Tanggal</label>
+  <input id="teknisi" placeholder="Nama Teknisi">
   <input type="date" id="tanggal">
-
-  <label>Jam</label>
   <input type="time" id="jam">
 
   <select id="status">
@@ -38,13 +36,14 @@
     <option>Pending</option>
   </select>
 
-  <button onclick="tambah()">Tambah Order</button>
+  <button onclick="tambah()">Tambah / Update</button>
 </div>
 
 <div id="list"></div>
 
 <script>
 let data = JSON.parse(localStorage.getItem("kjt")) || [];
+let editIndex = -1;
 
 function tambah(){
   let d = {
@@ -55,12 +54,19 @@ function tambah(){
     pk: pk.value,
     keluhan: keluhan.value,
     biaya: biaya.value,
+    teknisi: teknisi.value,
     tanggal: tanggal.value,
     jam: jam.value,
     status: status.value
   };
 
-  data.push(d);
+  if(editIndex >= 0){
+    data[editIndex] = d;
+    editIndex = -1;
+  } else {
+    data.push(d);
+  }
+
   localStorage.setItem("kjt", JSON.stringify(data));
   tampil();
 }
@@ -73,15 +79,16 @@ function tampil(){
       <b>${d.nama}</b> (${d.hp})<br>
       ${d.alamat}<br>
       ${d.merk} - ${d.pk}<br>
+      Teknisi: <b>${d.teknisi || "-"}</b><br>
       Keluhan: ${d.keluhan}<br>
       Biaya: Rp ${d.biaya}<br>
-      Tanggal: ${d.tanggal}<br>
-      Jam: ${d.jam}<br>
+      📅 ${d.tanggal} | ⏰ ${d.jam}<br>
       Status: <b>${d.status}</b><br><br>
 
       <button onclick="ubahStatus(${i},'Proses')">Proses</button>
       <button onclick="ubahStatus(${i},'Selesai')">Selesai</button>
       <button onclick="ubahStatus(${i},'Pending')">Pending</button>
+      <button class="edit" onclick="editData(${i})">Edit</button>
       <button class="wa" onclick="kirimWA(${i})">WA</button>
       <button class="hapus" onclick="hapus(${i})">Hapus</button>
     </div>
@@ -91,6 +98,23 @@ function tampil(){
   document.getElementById("list").innerHTML = html;
 }
 
+function editData(i){
+  let d = data[i];
+  nama.value = d.nama;
+  hp.value = d.hp;
+  alamat.value = d.alamat;
+  merk.value = d.merk;
+  pk.value = d.pk;
+  keluhan.value = d.keluhan;
+  biaya.value = d.biaya;
+  teknisi.value = d.teknisi;
+  tanggal.value = d.tanggal;
+  jam.value = d.jam;
+  status.value = d.status;
+
+  editIndex = i;
+}
+
 function ubahStatus(i,s){
   data[i].status = s;
   localStorage.setItem("kjt", JSON.stringify(data));
@@ -98,7 +122,7 @@ function ubahStatus(i,s){
 }
 
 function hapus(i){
-  if(confirm("Yakin mau hapus data ini?")){
+  if(confirm("Yakin hapus data?")){
     data.splice(i,1);
     localStorage.setItem("kjt", JSON.stringify(data));
     tampil();
@@ -111,19 +135,19 @@ function kirimWA(i){
   let pesan = `Halo ${d.nama},
 Jadwal Servis AC Anda:
 
-📅 Tanggal: ${d.tanggal}
-⏰ Jam: ${d.jam}
-📍 Alamat: ${d.alamat}
-🔧 Keluhan: ${d.keluhan}
-💰 Biaya: Rp ${d.biaya}
+📅 ${d.tanggal}
+⏰ ${d.jam}
+👷 Teknisi: ${d.teknisi}
+📍 ${d.alamat}
+🔧 ${d.keluhan}
+💰 Rp ${d.biaya}
 
 Mohon standby ya 🙏
 - Kabul Jaya Teknik`;
 
   let no = d.hp.replace(/^0/, "62");
   let url = "https://wa.me/" + no + "?text=" + encodeURIComponent(pesan);
-
-  window.open(url, "_blank");
+  window.open(url);
 }
 
 tampil();
