@@ -1,31 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Servis AC - Kabul Jaya Teknik</title>
+    <style>
+        body { font-family: Arial; padding: 10px; }
+        input, select { width: 100%; margin: 5px 0; padding: 8px; }
+        button { margin: 3px; padding: 5px 10px; border: none; cursor: pointer; }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        .proses { background: orange; color: white; }
+        .selesai { background: green; color: white; }
+        .pending { background: gray; color: white; }
+
+        .btn-wa { background: green; color: white; }
+        .btn-hapus { background: red; color: white; }
+        .btn-edit { background: orange; color: white; }
+    </style>
+</head>
+<body>
+
+<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
+
+<form id="formServis">
+    <input type="hidden" id="editIndex">
+
+    <input type="text" id="nama" placeholder="Nama Pelanggan">
+    <input type="text" id="hp" placeholder="No HP (628xxx)">
+    <input type="text" id="alamat" placeholder="Alamat">
+    <input type="text" id="merk" placeholder="Merk AC">
+    <input type="text" id="pk" placeholder="PK">
+    <input type="text" id="keluhan" placeholder="Keluhan">
+    <input type="text" id="biaya" placeholder="Biaya">
+    <input type="text" id="teknisi" placeholder="Nama Teknisi">
+
+    <input type="date" id="tanggal">
+    <input type="time" id="jam">
+
+    <select id="status">
+        <option value="Proses">Proses</option>
+        <option value="Selesai">Selesai</option>
+        <option value="Pending">Pending</option>
+    </select>
+
+    <button type="submit">Tambah / Update</button>
+</form>
+
+<div id="listData"></div>
+
 <script>
 let data = JSON.parse(localStorage.getItem("servis")) || [];
 
 function tampilkanData() {
-    let table = document.getElementById("tableData");
-    table.innerHTML = "";
+    let list = document.getElementById("listData");
+    list.innerHTML = "";
 
     data.forEach((item, index) => {
-        let pesan = `Halo ${item.nama}, servis AC Anda:\nMerk: ${item.merk}\nKeluhan: ${item.keluhan}\nBiaya: ${item.biaya}\nTeknisi: ${item.teknisi}`;
-        let waLink = `https://wa.me/${item.hp}?text=${encodeURIComponent(pesan)}`;
+        let warna = item.status.toLowerCase();
 
-        table.innerHTML += `
-        <tr>
-            <td>${item.nama}</td>
-            <td>${item.hp}</td>
-            <td>${item.merk}</td>
-            <td>${item.keluhan}</td>
-            <td>${item.biaya}</td>
-            <td>${item.teknisi}</td>
-            <td>
-                <button onclick="editData(${index})">Edit</button>
-                <button onclick="hapus(${index})">Hapus</button>
-                <a href="${waLink}" target="_blank">
-                    <button>WA</button>
-                </a>
-            </td>
-        </tr>
+        let pesan = `Halo ${item.nama}
+Servis AC Anda:
+Merk: ${item.merk}
+Keluhan: ${item.keluhan}
+Biaya: Rp ${item.biaya}
+Teknisi: ${item.teknisi}
+Status: ${item.status}`;
+
+        let wa = `https://wa.me/${item.hp}?text=${encodeURIComponent(pesan)}`;
+
+        list.innerHTML += `
+        <div class="card">
+            <b>${item.nama}</b> (${item.hp})<br>
+            ${item.alamat}<br>
+            ${item.merk} - ${item.pk}<br>
+            Teknisi: ${item.teknisi}<br>
+            Keluhan: ${item.keluhan}<br>
+            Biaya: Rp ${item.biaya}<br>
+            📅 ${item.tanggal} ⏰ ${item.jam}<br>
+            Status: <span class="${warna}">${item.status}</span><br><br>
+
+            <button onclick="setStatus(${index}, 'Proses')">Proses</button>
+            <button onclick="setStatus(${index}, 'Selesai')">Selesai</button>
+            <button onclick="setStatus(${index}, 'Pending')">Pending</button>
+
+            <button class="btn-edit" onclick="editData(${index})">Edit</button>
+            <a href="${wa}" target="_blank">
+                <button class="btn-wa">WA</button>
+            </a>
+            <button class="btn-hapus" onclick="hapus(${index})">Hapus</button>
+        </div>
         `;
     });
 }
+
+document.getElementById("formServis").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let index = document.getElementById("editIndex").value;
+
+    let newData = {
+        nama: nama.value,
+        hp: hp.value,
+        alamat: alamat.value,
+        merk: merk.value,
+        pk: pk.value,
+        keluhan: keluhan.value,
+        biaya: biaya.value,
+        teknisi: teknisi.value,
+        tanggal: tanggal.value,
+        jam: jam.value,
+        status: status.value
+    };
+
+    if (index === "") {
+        data.push(newData);
+    } else {
+        data[index] = newData;
+        editIndex.value = "";
+    }
+
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+    this.reset();
+});
+
+function hapus(i) {
+    data.splice(i, 1);
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+}
+
+function editData(i) {
+    let d = data[i];
+    editIndex.value = i;
+    nama.value = d.nama;
+    hp.value = d.hp;
+    alamat.value = d.alamat;
+    merk.value = d.merk;
+    pk.value = d.pk;
+    keluhan.value = d.keluhan;
+    biaya.value = d.biaya;
+    teknisi.value = d.teknisi;
+    tanggal.value = d.tanggal;
+    jam.value = d.jam;
+    status.value = d.status;
+}
+
+function setStatus(i, s) {
+    data[i].status = s;
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+}
+
+tampilkanData();
 </script>
+
+</body>
+</html>
