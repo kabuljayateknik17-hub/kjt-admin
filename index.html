@@ -1,44 +1,66 @@
 <script type="module">
+// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// CONFIG
 const firebaseConfig = {
-  apiKey: "PASTE_APIKEY_KAMU",
+  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
   databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "kjt-admin",
-  storageBucket: "kjt-admin.appspot.com",
+  storageBucket: "kjt-admin.firebasestorage.app",
   messagingSenderId: "605090490067",
   appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
 };
 
+// INIT
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// ================= SIMPAN =================
 window.tambah = function(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
+
+  if(!nama || !alamat){
+    alert("Isi dulu semua!");
+    return;
+  }
 
   push(ref(db, "data"), {
     nama: nama,
     alamat: alamat
   });
 
-  alert("Berhasil disimpan");
-};
+  alert("Data berhasil disimpan!");
 
-onValue(ref(db, "data"), (snapshot) => {
+  document.getElementById("nama").value = "";
+  document.getElementById("alamat").value = "";
+}
+
+// ================= TAMPIL =================
+const dataRef = ref(db, "data");
+onValue(dataRef, (snapshot) => {
   const data = snapshot.val();
-  const list = document.getElementById("listData");
-  list.innerHTML = "";
+  const container = document.getElementById("listData");
+
+  container.innerHTML = "";
 
   if(!data){
-    list.innerHTML = "Belum ada data";
+    container.innerHTML = "Belum ada data";
     return;
   }
 
-  for(let key in data){
-    list.innerHTML += `<p><b>${data[key].nama}</b> - ${data[key].alamat}</p>`;
-  }
+  Object.keys(data).forEach((key) => {
+    const item = data[key];
+
+    container.innerHTML += `
+      <div style="margin:10px 0; padding:10px; border:1px solid #ccc;">
+        <b>${item.nama}</b><br>
+        ${item.alamat}
+      </div>
+    `;
+  });
 });
 </script>
