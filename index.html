@@ -1,9 +1,7 @@
-<script type="module">
-// Import Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-// CONFIG
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
@@ -14,53 +12,46 @@ const firebaseConfig = {
   appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
 };
 
-// INIT
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// ================= SIMPAN =================
-window.tambah = function(){
+// SIMPAN
+function tambah(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
 
   if(!nama || !alamat){
-    alert("Isi dulu semua!");
+    alert("Isi dulu!");
     return;
   }
 
-  push(ref(db, "data"), {
+  db.ref("data").push({
     nama: nama,
     alamat: alamat
   });
 
-  alert("Data berhasil disimpan!");
-
-  document.getElementById("nama").value = "";
-  document.getElementById("alamat").value = "";
+  alert("Berhasil disimpan!");
 }
 
-// ================= TAMPIL =================
-const dataRef = ref(db, "data");
-onValue(dataRef, (snapshot) => {
+// TAMPIL
+db.ref("data").on("value", function(snapshot){
   const data = snapshot.val();
-  const container = document.getElementById("listData");
+  const list = document.getElementById("listData");
 
-  container.innerHTML = "";
+  list.innerHTML = "";
 
   if(!data){
-    container.innerHTML = "Belum ada data";
+    list.innerHTML = "Belum ada data";
     return;
   }
 
-  Object.keys(data).forEach((key) => {
-    const item = data[key];
-
-    container.innerHTML += `
-      <div style="margin:10px 0; padding:10px; border:1px solid #ccc;">
-        <b>${item.nama}</b><br>
-        ${item.alamat}
+  for(let key in data){
+    list.innerHTML += `
+      <div>
+        <b>${data[key].nama}</b><br>
+        ${data[key].alamat}
       </div>
     `;
-  });
+  }
 });
 </script>
