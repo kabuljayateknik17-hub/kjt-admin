@@ -1,55 +1,119 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin</title>
+  <title>Admin Servis AC - Kabul Jaya Teknik</title>
 </head>
 <body>
 
-<h2>Input Servis</h2>
+<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
 
 <input id="nama" placeholder="Nama"><br><br>
+<input id="hp" placeholder="No HP"><br><br>
 <input id="alamat" placeholder="Alamat"><br><br>
+<input id="merk" placeholder="Merk AC"><br><br>
+<input id="pk" placeholder="PK"><br><br>
+<input id="keluhan" placeholder="Keluhan"><br><br>
+<input id="biaya" placeholder="Biaya"><br><br>
+<input id="teknisi" placeholder="Nama Teknisi"><br><br>
 
-<button onclick="tambah()">Simpan</button>
+<select id="status">
+  <option value="Proses">Proses</option>
+  <option value="Selesai">Selesai</option>
+  <option value="Pending">Pending</option>
+</select><br><br>
 
-<h3>Data</h3>
+<button onclick="simpan()">Simpan</button>
+
+<h3>Data Servis</h3>
 <div id="list"></div>
 
-<!-- Firebase versi SIMPLE -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "PASTE_APIKEY_KAMU",
+var firebaseConfig = {
+  apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
   databaseURL: "https://kjt-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "kjt-admin"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+var db = firebase.database();
 
-function tambah(){
-  var nama = document.getElementById("nama").value;
-  var alamat = document.getElementById("alamat").value;
+var editId = null;
 
-  db.ref("data").push({
-    nama: nama,
-    alamat: alamat
-  });
+function simpan(){
+  var data = {
+    nama: document.getElementById("nama").value,
+    hp: document.getElementById("hp").value,
+    alamat: document.getElementById("alamat").value,
+    merk: document.getElementById("merk").value,
+    pk: document.getElementById("pk").value,
+    keluhan: document.getElementById("keluhan").value,
+    biaya: document.getElementById("biaya").value,
+    teknisi: document.getElementById("teknisi").value,
+    status: document.getElementById("status").value,
+    tanggal: new Date().toLocaleDateString(),
+    jam: new Date().toLocaleTimeString()
+  };
 
-  alert("OK");
+  if(editId){
+    db.ref("data/"+editId).update(data);
+    editId = null;
+  } else {
+    db.ref("data").push(data);
+  }
+}
+
+function hapus(id){
+  db.ref("data/"+id).remove();
+}
+
+function edit(id, data){
+  editId = id;
+  document.getElementById("nama").value = data.nama;
+  document.getElementById("hp").value = data.hp;
+  document.getElementById("alamat").value = data.alamat;
+  document.getElementById("merk").value = data.merk;
+  document.getElementById("pk").value = data.pk;
+  document.getElementById("keluhan").value = data.keluhan;
+  document.getElementById("biaya").value = data.biaya;
+  document.getElementById("teknisi").value = data.teknisi;
+  document.getElementById("status").value = data.status;
 }
 
 db.ref("data").on("value", function(snapshot){
-  var data = snapshot.val();
-  var list = document.getElementById("list");
-  list.innerHTML = "";
+  var html = "";
 
-  for(var key in data){
-    list.innerHTML += "<p>"+data[key].nama+" - "+data[key].alamat+"</p>";
-  }
+  snapshot.forEach(function(child){
+    var d = child.val();
+    var id = child.key;
+
+    var waLink = "https://wa.me/"+d.hp+"?text=Halo%20"+d.nama+"%20servis%20AC%20anda%20status:%20"+d.status;
+
+    html += `
+    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+      <b>${d.nama}</b> (${d.hp})<br>
+      ${d.alamat}<br>
+      ${d.merk} - ${d.pk}<br>
+      Keluhan: ${d.keluhan}<br>
+      Biaya: Rp ${d.biaya}<br>
+      Teknisi: ${d.teknisi}<br>
+      📅 ${d.tanggal} | ⏰ ${d.jam}<br>
+      Status: <b>${d.status}</b><br><br>
+
+      <button onclick='edit("${id}", ${JSON.stringify(d)})'>Edit</button>
+      <a href="${waLink}" target="_blank">
+        <button style="background:green;color:white;">WA</button>
+      </a>
+      <button onclick='hapus("${id}")' style="background:red;color:white;">Hapus</button>
+    </div>
+    `;
+  });
+
+  document.getElementById("list").innerHTML = html;
 });
 </script>
 
