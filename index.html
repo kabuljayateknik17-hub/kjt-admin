@@ -2,23 +2,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KJT Admin Pro</title>
+  <title>KJT Admin</title>
   <style>
     body { font-family: Arial; background:#f5f5f5; padding:20px; }
-    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:6px 10px; margin:3px; }
-    .hapus { background:red; color:#fff; }
-    .wa { background:green; color:#fff; }
-    .edit { background:orange; color:#fff; }
+    input { width:100%; padding:8px; margin:5px 0; }
+    button { padding:10px; margin-top:10px; }
   </style>
 </head>
+
+<body>
+
+<h2>Input Data Servis</h2>
+
+<input id="nama" placeholder="Nama">
+<input id="alamat" placeholder="Alamat">
+<input id="tanggal" type="date">
+<input id="jam" type="time">
+
+<button onclick="tambah()">Simpan</button>
+
+<hr>
+
+<h3>Data Masuk</h3>
+<div id="list"></div>
+
+<!-- ================== SCRIPT TAMBAH ================== -->
+<script>
+function tambah(){
+  let data = {
+    nama: document.getElementById("nama").value,
+    alamat: document.getElementById("alamat").value,
+    tanggal: document.getElementById("tanggal").value,
+    jam: document.getElementById("jam").value
+  };
+
+  simpanData(data);
+}
+</script>
+
+<!-- ================== FIREBASE ================== -->
 <script type="module">
 // Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// CONFIG (dari Firebase kamu)
+// CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
@@ -38,160 +66,30 @@ window.simpanData = function(data){
   push(ref(db, "data"), data);
 }
 
-// AMBIL
-window.ambilData = function(callback){
-  onValue(ref(db, "data"), (snapshot)=>{
-    callback(snapshot.val());
-  });
-}
-
-// HAPUS
-window.hapusData = function(id){
-  remove(ref(db, "data/" + id));
-}
-
-// UPDATE
-window.updateData = function(id, data){
-  update(ref(db, "data/" + id), data);
-}
-</script>
-<body>
-
-<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
-
-<div class="box">
-  <input id="nama" placeholder="Nama Pelanggan">
-  <input id="hp" placeholder="No HP">
-  <input id="alamat" placeholder="Alamat">
-  <input id="merk" placeholder="Merk AC">
-  <input id="pk" placeholder="PK">
-  <input id="keluhan" placeholder="Keluhan">
-  <input id="biaya" placeholder="Biaya">
-  <input id="teknisi" placeholder="Nama Teknisi">
-  <input type="date" id="tanggal">
-  <input type="time" id="jam">
-
-  <select id="status">
-    <option>Proses</option>
-    <option>Selesai</option>
-    <option>Pending</option>
-  </select>
-
-  <button onclick="tambah()">Tambah / Update</button>
-</div>
-
-<div id="list"></div>
-
-<script>
-let data = JSON.parse(localStorage.getItem("kjt")) || [];
-let editIndex = -1;
-
-function tambah(){
-  let d = {
-    nama: nama.value,
-    hp: hp.value,
-    alamat: alamat.value,
-    merk: merk.value,
-    pk: pk.value,
-    keluhan: keluhan.value,
-    biaya: biaya.value,
-    teknisi: teknisi.value,
-    tanggal: tanggal.value,
-    jam: jam.value,
-    status: status.value
-  };
-
-  if(editIndex >= 0){
-    data[editIndex] = d;
-    editIndex = -1;
-  } else {
-    data.push(d);
-  }
-
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
-}
-
-function tampil(){
+// TAMPIL DATA
+onValue(ref(db, "data"), (snapshot)=>{
+  let data = snapshot.val();
   let html = "";
-  data.forEach((d,i)=>{
-    html += `
-    <div class="box">
-      <b>${d.nama}</b> (${d.hp})<br>
-      ${d.alamat}<br>
-      ${d.merk} - ${d.pk}<br>
-      Teknisi: <b>${d.teknisi || "-"}</b><br>
-      Keluhan: ${d.keluhan}<br>
-      Biaya: Rp ${d.biaya}<br>
-      📅 ${d.tanggal} | ⏰ ${d.jam}<br>
-      Status: <b>${d.status}</b><br><br>
 
-      <button onclick="ubahStatus(${i},'Proses')">Proses</button>
-      <button onclick="ubahStatus(${i},'Selesai')">Selesai</button>
-      <button onclick="ubahStatus(${i},'Pending')">Pending</button>
-      <button class="edit" onclick="editData(${i})">Edit</button>
-      <button class="wa" onclick="kirimWA(${i})">WA</button>
-      <button class="hapus" onclick="hapus(${i})">Hapus</button>
-    </div>
+  for(let id in data){
+    let d = data[id];
+    html += `
+      <div style="background:#fff; padding:10px; margin:10px 0;">
+        <b>${d.nama}</b><br>
+        ${d.alamat}<br>
+        ${d.tanggal} - ${d.jam}<br>
+        <button onclick="hapus('${id}')">Hapus</button>
+      </div>
     `;
-  });
+  }
 
   document.getElementById("list").innerHTML = html;
+});
+
+// HAPUS
+window.hapus = function(id){
+  remove(ref(db, "data/" + id));
 }
-
-function editData(i){
-  let d = data[i];
-  nama.value = d.nama;
-  hp.value = d.hp;
-  alamat.value = d.alamat;
-  merk.value = d.merk;
-  pk.value = d.pk;
-  keluhan.value = d.keluhan;
-  biaya.value = d.biaya;
-  teknisi.value = d.teknisi;
-  tanggal.value = d.tanggal;
-  jam.value = d.jam;
-  status.value = d.status;
-
-  editIndex = i;
-}
-
-function ubahStatus(i,s){
-  data[i].status = s;
-  localStorage.setItem("kjt", JSON.stringify(data));
-  tampil();
-}
-
-function hapus(i){
-  if(confirm("Yakin hapus data?")){
-    data.splice(i,1);
-    localStorage.setItem("kjt", JSON.stringify(data));
-    tampil();
-  }
-}
-
-function kirimWA(i){
-  let d = data[i];
-
-  let pesan = `Halo ${d.nama},
-Jadwal Servis AC Anda:
-
-📅 ${d.tanggal}
-⏰ ${d.jam}
-👷 Teknisi: ${d.teknisi}
-📍 ${d.alamat}
-🔧 ${d.keluhan}
-💰 Rp ${d.biaya}
-
-Mohon standby ya 🙏
-- Kabul Jaya Teknik`;
-
-  let no = d.hp.replace(/^0/, "62");
-  let url = "https://wa.me/" + no + "?text=" + encodeURIComponent(pesan);
-  window.open(url);
-}
-
-tampil();
 </script>
 
 </body>
