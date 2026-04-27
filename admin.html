@@ -2,12 +2,28 @@
 <html>
 <head>
     <title>Admin KJT</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        button {
+            margin: 2px;
+        }
+    </style>
 </head>
 <body>
 
 <h2>Input Data Servis AC</h2>
 
 <form id="formServis">
+    <input type="hidden" id="editIndex">
+
     Nama: <input type="text" id="nama"><br><br>
     No HP: <input type="text" id="hp"><br><br>
     Alamat: <input type="text" id="alamat"><br><br>
@@ -23,27 +39,49 @@
 </form>
 
 <h2>Data Servis</h2>
-<ul id="listData"></ul>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>HP</th>
+            <th>Merk</th>
+            <th>Keluhan</th>
+            <th>Biaya</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody id="tableData"></tbody>
+</table>
 
 <script>
 let data = JSON.parse(localStorage.getItem("servis")) || [];
 
 function tampilkanData() {
-    let list = document.getElementById("listData");
-    list.innerHTML = "";
+    let table = document.getElementById("tableData");
+    table.innerHTML = "";
 
     data.forEach((item, index) => {
-        list.innerHTML += `
-        <li>
-            ${item.nama} - ${item.merk} - ${item.keluhan} 
-            <button onclick="hapus(${index})">Hapus</button>
-        </li>
+        table.innerHTML += `
+        <tr>
+            <td>${item.nama}</td>
+            <td>${item.hp}</td>
+            <td>${item.merk}</td>
+            <td>${item.keluhan}</td>
+            <td>${item.biaya}</td>
+            <td>
+                <button onclick="editData(${index})">Edit</button>
+                <button onclick="hapus(${index})">Hapus</button>
+            </td>
+        </tr>
         `;
     });
 }
 
 document.getElementById("formServis").addEventListener("submit", function(e) {
     e.preventDefault();
+
+    let index = document.getElementById("editIndex").value;
 
     let newData = {
         nama: document.getElementById("nama").value,
@@ -58,9 +96,14 @@ document.getElementById("formServis").addEventListener("submit", function(e) {
         jam: document.getElementById("jam").value
     };
 
-    data.push(newData);
-    localStorage.setItem("servis", JSON.stringify(data));
+    if (index === "") {
+        data.push(newData);
+    } else {
+        data[index] = newData;
+        document.getElementById("editIndex").value = "";
+    }
 
+    localStorage.setItem("servis", JSON.stringify(data));
     tampilkanData();
     this.reset();
 });
@@ -69,6 +112,22 @@ function hapus(index) {
     data.splice(index, 1);
     localStorage.setItem("servis", JSON.stringify(data));
     tampilkanData();
+}
+
+function editData(index) {
+    let item = data[index];
+
+    document.getElementById("editIndex").value = index;
+    document.getElementById("nama").value = item.nama;
+    document.getElementById("hp").value = item.hp;
+    document.getElementById("alamat").value = item.alamat;
+    document.getElementById("merk").value = item.merk;
+    document.getElementById("pk").value = item.pk;
+    document.getElementById("keluhan").value = item.keluhan;
+    document.getElementById("biaya").value = item.biaya;
+    document.getElementById("teknisi").value = item.teknisi;
+    document.getElementById("tanggal").value = item.tanggal;
+    document.getElementById("jam").value = item.jam;
 }
 
 tampilkanData();
