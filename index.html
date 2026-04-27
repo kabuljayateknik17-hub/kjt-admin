@@ -3,46 +3,21 @@
 <html>
 <head>
   <title>KJT Admin</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .box {
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-    }
-    button {
-      padding: 10px;
-      cursor: pointer;
-    }
-  </style>
 </head>
 
 <body>
 
-  <div class="box">
-    <h2>Input Data Servis</h2>
-    <input type="text" id="nama" placeholder="Nama">
-    <input type="text" id="alamat" placeholder="Alamat">
-    <button onclick="tambah()">Simpan</button>
-  </div>
+<h2>Input Data</h2>
 
-  <div class="box">
-    <h3>Data Masuk</h3>
-    <div id="listData">Loading...</div>
-  </div>
+<input type="text" id="nama" placeholder="Nama"><br><br>
+<input type="text" id="alamat" placeholder="Alamat"><br><br>
+
+<button onclick="tambah()">Simpan</button>
+
+<h3>Data:</h3>
+<div id="listData"></div>
 
 <script type="module">
-// ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -59,30 +34,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ================= SIMPAN =================
 window.tambah = function(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
 
   if(!nama || !alamat){
-    alert("Isi dulu semua!");
+    alert("Isi dulu!");
     return;
   }
 
-  push(ref(db, "data"), {
-    nama: nama,
-    alamat: alamat
-  });
-
-  document.getElementById("nama").value = "";
-  document.getElementById("alamat").value = "";
+  push(ref(db, "data"), { nama, alamat });
 }
-
-// ================= TAMPIL =================
-const list = document.getElementById("listData");
 
 onValue(ref(db, "data"), (snapshot) => {
   const data = snapshot.val();
+  const list = document.getElementById("listData");
+
   list.innerHTML = "";
 
   if(!data){
@@ -91,12 +58,7 @@ onValue(ref(db, "data"), (snapshot) => {
   }
 
   for(let key in data){
-    list.innerHTML += `
-      <div style="border-bottom:1px solid #ddd; padding:10px 0;">
-        <b>${data[key].nama}</b><br>
-        ${data[key].alamat}
-      </div>
-    `;
+    list.innerHTML += `<p><b>${data[key].nama}</b> - ${data[key].alamat}</p>`;
   }
 });
 </script>
