@@ -1,7 +1,51 @@
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KJT Admin</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+    }
+    button {
+      padding: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h2>Input Data Servis</h2>
+    <input type="text" id="nama" placeholder="Nama">
+    <input type="text" id="alamat" placeholder="Alamat">
+    <button onclick="tambah()">Simpan</button>
+  </div>
+
+  <div class="box">
+    <h3>Data Masuk</h3>
+    <div id="listData">Loading...</div>
+  </div>
+
+<script type="module">
+// ================= FIREBASE =================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCXazgiVakDMT888hwnSLRKsOrNeZdyD9k",
   authDomain: "kjt-admin.firebaseapp.com",
@@ -12,32 +56,33 @@ const firebaseConfig = {
   appId: "1:605090490067:web:f6e9d429a88ebc594b1626"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// SIMPAN
-function tambah(){
+// ================= SIMPAN =================
+window.tambah = function(){
   const nama = document.getElementById("nama").value;
   const alamat = document.getElementById("alamat").value;
 
   if(!nama || !alamat){
-    alert("Isi dulu!");
+    alert("Isi dulu semua!");
     return;
   }
 
-  db.ref("data").push({
+  push(ref(db, "data"), {
     nama: nama,
     alamat: alamat
   });
 
-  alert("Berhasil disimpan!");
+  document.getElementById("nama").value = "";
+  document.getElementById("alamat").value = "";
 }
 
-// TAMPIL
-db.ref("data").on("value", function(snapshot){
-  const data = snapshot.val();
-  const list = document.getElementById("listData");
+// ================= TAMPIL =================
+const list = document.getElementById("listData");
 
+onValue(ref(db, "data"), (snapshot) => {
+  const data = snapshot.val();
   list.innerHTML = "";
 
   if(!data){
@@ -47,7 +92,7 @@ db.ref("data").on("value", function(snapshot){
 
   for(let key in data){
     list.innerHTML += `
-      <div>
+      <div style="border-bottom:1px solid #ddd; padding:10px 0;">
         <b>${data[key].nama}</b><br>
         ${data[key].alamat}
       </div>
@@ -55,3 +100,6 @@ db.ref("data").on("value", function(snapshot){
   }
 });
 </script>
+
+</body>
+</html>
