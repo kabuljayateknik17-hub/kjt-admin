@@ -2,9 +2,84 @@
 <html>
 <head>
   <title>KJT Admin</title>
+  <style>
+    body { font-family: Arial; background:#f5f5f5; padding:20px; }
+    .box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
+    input, select { width:100%; padding:8px; margin:5px 0; }
+    button { padding:8px; margin-top:5px; }
+  </style>
 </head>
 <body>
-  <h1>Admin Servis AC - Kabul Jaya Teknik</h1>
-  <p>Aplikasi sudah jalan 🚀</p>
+
+<h2>Admin Servis AC - Kabul Jaya Teknik</h2>
+
+<div class="box">
+  <input id="nama" placeholder="Nama Pelanggan">
+  <input id="hp" placeholder="No HP">
+  <input id="alamat" placeholder="Alamat">
+  <input id="merk" placeholder="Merk AC">
+  <input id="pk" placeholder="PK">
+  <input id="keluhan" placeholder="Keluhan">
+  <input id="biaya" placeholder="Biaya">
+
+  <select id="status">
+    <option>Proses</option>
+    <option>Selesai</option>
+    <option>Pending</option>
+  </select>
+
+  <button onclick="tambah()">Tambah Order</button>
+</div>
+
+<div id="list"></div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("kjt")) || [];
+
+function tampil(){
+  let html = "";
+  data.forEach((d,i)=>{
+    html += `
+    <div class="box">
+      <b>${d.nama}</b> (${d.hp})<br>
+      ${d.alamat}<br>
+      ${d.merk} - ${d.pk}<br>
+      Keluhan: ${d.keluhan}<br>
+      Biaya: Rp ${d.biaya}<br>
+      Status: <b>${d.status}</b><br><br>
+      <button onclick="update(${i},'Proses')">Proses</button>
+      <button onclick="update(${i},'Selesai')">Selesai</button>
+      <button onclick="update(${i},'Pending')">Pending</button>
+    </div>
+    `;
+  });
+  document.getElementById("list").innerHTML = html;
+}
+
+function tambah(){
+  let d = {
+    nama: nama.value,
+    hp: hp.value,
+    alamat: alamat.value,
+    merk: merk.value,
+    pk: pk.value,
+    keluhan: keluhan.value,
+    biaya: biaya.value,
+    status: status.value
+  };
+  data.push(d);
+  localStorage.setItem("kjt", JSON.stringify(data));
+  tampil();
+}
+
+function update(i,s){
+  data[i].status = s;
+  localStorage.setItem("kjt", JSON.stringify(data));
+  tampil();
+}
+
+tampil();
+</script>
+
 </body>
 </html>
