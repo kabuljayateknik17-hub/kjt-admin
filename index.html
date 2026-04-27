@@ -1,12 +1,137 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KJT Admin</title>
+    <title>Admin KJT</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        button {
+            margin: 2px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Selamat datang di KJT Admin</h1>
-    <p>Sistem servis AC Kabul Jaya Teknik</p>
+
+<h2>Input Data Servis AC</h2>
+
+<form id="formServis">
+    <input type="hidden" id="editIndex">
+
+    Nama: <input type="text" id="nama"><br><br>
+    No HP: <input type="text" id="hp"><br><br>
+    Alamat: <input type="text" id="alamat"><br><br>
+    Merk AC: <input type="text" id="merk"><br><br>
+    PK: <input type="text" id="pk"><br><br>
+    Keluhan: <input type="text" id="keluhan"><br><br>
+    Biaya: <input type="text" id="biaya"><br><br>
+    Teknisi: <input type="text" id="teknisi"><br><br>
+    Tanggal: <input type="date" id="tanggal"><br><br>
+    Jam: <input type="time" id="jam"><br><br>
+
+    <button type="submit">Simpan</button>
+</form>
+
+<h2>Data Servis</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>HP</th>
+            <th>Merk</th>
+            <th>Keluhan</th>
+            <th>Biaya</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody id="tableData"></tbody>
+</table>
+
+<script>
+let data = JSON.parse(localStorage.getItem("servis")) || [];
+
+function tampilkanData() {
+    let table = document.getElementById("tableData");
+    table.innerHTML = "";
+
+    data.forEach((item, index) => {
+        table.innerHTML += `
+        <tr>
+            <td>${item.nama}</td>
+            <td>${item.hp}</td>
+            <td>${item.merk}</td>
+            <td>${item.keluhan}</td>
+            <td>${item.biaya}</td>
+            <td>
+                <button onclick="editData(${index})">Edit</button>
+                <button onclick="hapus(${index})">Hapus</button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+document.getElementById("formServis").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let index = document.getElementById("editIndex").value;
+
+    let newData = {
+        nama: document.getElementById("nama").value,
+        hp: document.getElementById("hp").value,
+        alamat: document.getElementById("alamat").value,
+        merk: document.getElementById("merk").value,
+        pk: document.getElementById("pk").value,
+        keluhan: document.getElementById("keluhan").value,
+        biaya: document.getElementById("biaya").value,
+        teknisi: document.getElementById("teknisi").value,
+        tanggal: document.getElementById("tanggal").value,
+        jam: document.getElementById("jam").value
+    };
+
+    if (index === "") {
+        data.push(newData);
+    } else {
+        data[index] = newData;
+        document.getElementById("editIndex").value = "";
+    }
+
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+    this.reset();
+});
+
+function hapus(index) {
+    data.splice(index, 1);
+    localStorage.setItem("servis", JSON.stringify(data));
+    tampilkanData();
+}
+
+function editData(index) {
+    let item = data[index];
+
+    document.getElementById("editIndex").value = index;
+    document.getElementById("nama").value = item.nama;
+    document.getElementById("hp").value = item.hp;
+    document.getElementById("alamat").value = item.alamat;
+    document.getElementById("merk").value = item.merk;
+    document.getElementById("pk").value = item.pk;
+    document.getElementById("keluhan").value = item.keluhan;
+    document.getElementById("biaya").value = item.biaya;
+    document.getElementById("teknisi").value = item.teknisi;
+    document.getElementById("tanggal").value = item.tanggal;
+    document.getElementById("jam").value = item.jam;
+}
+
+tampilkanData();
+</script>
+
 </body>
 </html>
